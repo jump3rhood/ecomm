@@ -8,6 +8,8 @@ import com.john.ecommerce.productservice.model.Category;
 import com.john.ecommerce.productservice.model.Product;
 import com.john.ecommerce.productservice.repository.CategoryRepo;
 import com.john.ecommerce.productservice.repository.ProductRepo;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
         this.redisTemplate = redisTemplate;
     }
 
+    @Cacheable(value="product-list", key="'all-products'")
     @Override
     public List<ProductResponseDTO> getAllProducts() {
         // return only products with isDeleted = false
@@ -46,27 +49,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO getProductById(int id) {
-        Optional<Product> optionalProduct = productRepo.findById(id);
-
         // first check if the product with id is present in redis
-        ProductResponseDTO product = (ProductResponseDTO) redisTemplate.opsForHash().get("PRODUCTS", "PRODUCT_" + id);
+        ProductResponseDTO productDTO = (ProductResponseDTO) redisTemplate.opsForHash().get("PRODUCTS", "PRODUCT_" + id);
 
         // cache HIT
-        if(product != null){
-            return product;
+        if(productDTO != null){
+//            System.out.println("FOUND IN REDIS");
+            return productDTO;
         }
         // cache MISS
         // return product with isDeleted = false
-        if (optionalProduct.isEmpty()) {
+        Optional<Product> optionalProduct = productRepo.findByIdAndIsDeletedFalse(id);
+        if (optionalProduct.isEmpty())
             throw new ProductNotFoundException(id);
-        }
         Product productFromDb = optionalProduct.get();
-        ProductResponseDTO productResponseDTO = productMapper.productToProductResponseDTO(productFromDb);
+        productDTO = productMapper.productToProductResponseDTO(productFromDb);
         // Store in Redis
-        redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + id, productResponseDTO);
-        return productResponseDTO;
+        redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + id, productDTO);
+        return productDTO;
     }
 
+    @CacheEvict(value="product-list", allEntries = true)
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         Product product = new Product();
@@ -85,26 +88,29 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setCategory(category);
         Product savedProduct = productRepo.save(product);
+
         return productMapper.productToProductResponseDTO(savedProduct);
     }
 
+    @CacheEvict(value="product-list", allEntries = true)
     @Override
     public ProductResponseDTO updateProduct(int id, ProductRequestDTO productRequestDTO) {
         Optional<Product> optionalProduct = productRepo.findById(id);
-        if(optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            product.setTitle(productRequestDTO.getTitle());
-            product.setDescription(productRequestDTO.getDescription());
-            product.setPrice(productRequestDTO.getPrice());
-            product.setImage(productRequestDTO.getImage());
-            product.setIsDeleted(false);
-            product.setCategory(categoryRepo.getCategoryByTitle(productRequestDTO.getCategoryTitle()));
-            Product updatedProduct = productRepo.save(product);
-            return productMapper.productToProductResponseDTO(updatedProduct);
-        }
-        throw new ProductNotFoundException(id);
+        if(optionalProduct.isEmpty()) throw new ProductNotFoundException(id);
+
+        Product product = optionalProduct.get();
+        product.setTitle(productRequestDTO.getTitle());
+        product.setDescription(productRequestDTO.getDescription());
+        product.setPrice(productRequestDTO.getPrice());
+        product.setImage(productRequestDTO.getImage());
+        product.setIsDeleted(false);
+        product.setCategory(categoryRepo.getCategoryByTitle(productRequestDTO.getCategoryTitle()));
+        Product updatedProduct = productRepo.save(product);
+        redisTemplate.opsForHash().put("PRODUCTS", "PRODUCT_" + id, updatedProduct);
+        return productMapper.productToProductResponseDTO(updatedProduct);
     }
 
+    @CacheEvict(value="product-list", allEntries = true)
     @Override
     public void deleteProduct(int id) {
         Optional<Product> optionalProduct = productRepo.findById(id);
@@ -112,15 +118,18 @@ public class ProductServiceImpl implements ProductService {
             Product product = optionalProduct.get();
             product.setIsDeleted(true);
             productRepo.save(product);
+            redisTemplate.opsForHash().delete("PRODUCTS", "PRODUCT_" + id);
         }
     }
 
     @Override
+    @Cacheable(value="category-list", key="#pageable.pageNumber+'_'+#pageable.pageSize+'_'+#pageable.sort.toString()")
     public Page<ProductResponseDTO> getAllProducts(Pageable pageable) {
         Page<Product> productPage = productRepo.findAll(pageable);
         return productPage.map(productMapper::productToProductResponseDTO);
     }
 
+    @Cacheable(value="product-list", key="#categoryTitle")
     @Override
     public List<ProductResponseDTO> getProductsByCategoryTitle(String categoryTitle) {
         List<Product> products = productRepo.findAllByCategoryTitle(categoryTitle);

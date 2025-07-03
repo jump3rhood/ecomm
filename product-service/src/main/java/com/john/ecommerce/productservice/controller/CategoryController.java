@@ -4,9 +4,11 @@ import com.john.ecommerce.productservice.dto.CategoryResponseDTO;
 import com.john.ecommerce.productservice.dto.CategoryRequestDTO;
 import com.john.ecommerce.productservice.service.CategoryService;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+
     // constructor injection
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
@@ -26,8 +29,10 @@ public class CategoryController {
         List<CategoryResponseDTO> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable int id) {
+
         CategoryResponseDTO dto = categoryService.getCategoryById(id);
         return ResponseEntity.ok(dto);
     }

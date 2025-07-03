@@ -4,6 +4,7 @@ import com.john.ecommerce.productservice.dto.ProductRequestDTO;
 import com.john.ecommerce.productservice.dto.ProductResponseDTO;
 import com.john.ecommerce.productservice.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,10 +62,12 @@ public class ProductController {
 
     @GetMapping("/list")
     public ResponseEntity<Page<ProductResponseDTO>> getProductsPageable(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "3") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, ascending ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending());
         Page<ProductResponseDTO> productPage = productService.getAllProducts(pageable);
         return new ResponseEntity<>(productPage, HttpStatus.OK);
     }
