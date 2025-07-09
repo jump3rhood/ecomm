@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: productservice
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"  # Host:Container
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-ppassword"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - backend
+
+  redis:
+    image: redis
+    container_name: my-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  productservice:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: productservice
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: password
+      REDIS_HOST: my-redis
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  backend:
+    driver: bridge

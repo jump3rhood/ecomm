@@ -1,6 +1,5 @@
 package com.john.ecommerce.productservice.configurations;
 
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -18,6 +17,7 @@ public class ApplicationConfig {
         template.setConnectionFactory(factory);
         return template;
     }
+
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
