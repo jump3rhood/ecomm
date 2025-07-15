@@ -2,7 +2,6 @@ package org.john.personal.userservice.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class UserEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String username;
+    private String email;
 
     @Column(nullable = false)
     private String password;

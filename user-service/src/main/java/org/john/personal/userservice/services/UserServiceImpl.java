@@ -39,14 +39,14 @@ public class UserServiceImpl {
     }
 
     public UserResponseDTO registerUser(RegisterRequestDto requestDto) {
-        Optional<UserEntity> userEntityOptional = userRepository.findByUsername(requestDto.getUsername());
+        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(requestDto.getEmail());
         if(userEntityOptional.isPresent()) {
             throw new UserNameAlreadyExists("Username already taken!");
         }
         UserEntity user = new UserEntity();
         user.setFirstName(requestDto.getFirstName());
         user.setLastName(requestDto.getLastName());
-        user.setUsername(requestDto.getUsername());
+        user.setEmail(requestDto.getEmail());
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         if(requestDto.getRoles() != null && !requestDto.getRoles().isEmpty()){
@@ -60,15 +60,15 @@ public class UserServiceImpl {
         return UserResponseDTO.from(user);
     }
 
-    public Map<String, Object> login(String username, String password) {
+    public Map<String, Object> login(String email, String password) {
 
         Map<String, Object> response = new HashMap<>();
 
         System.out.println("Reached here*****************");
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
             // Only fetch user after successful authentication
-            Optional<UserEntity> userEntityOptional = userRepository.findByUsername(username);
+            Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
             if(userEntityOptional.isEmpty())
                     throw new RuntimeException("User found during auth but not in DB - data inconsistency!");
             String accessToken = generateToken(userEntityOptional.get(), authentication, 3600);
@@ -87,7 +87,7 @@ public class UserServiceImpl {
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiryDuration))
                 .subject(authentication.getName())
-                .claim("role", authentication.getAuthorities().stream()
+                .claim("roles", authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet()))
                 .claim("firstName", userEntity.getFirstName())

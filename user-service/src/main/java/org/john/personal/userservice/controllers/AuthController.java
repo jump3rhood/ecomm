@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-public class UserController {
+public class AuthController {
     @Autowired
     private UserServiceImpl service;
 
@@ -22,6 +22,6 @@ public class UserController {
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginRequestDto requestDto){
-        return ResponseEntity.ok(service.login(requestDto.getUsername(), requestDto.getPassword()));
+        return ResponseEntity.ok(service.login(requestDto.getEmail(), requestDto.getPassword()));
     }
 }

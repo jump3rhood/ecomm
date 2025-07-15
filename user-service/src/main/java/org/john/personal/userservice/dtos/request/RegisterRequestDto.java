@@ -12,7 +12,7 @@ import java.util.List;
 public class RegisterRequestDto {
     private String firstName;
     private String lastName;
-    private String username;
+    private String email;
     private String password;
     private List<Role> roles;
 }
