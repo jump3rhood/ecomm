@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name="users")
@@ -28,5 +31,9 @@ public class UserEntity {
     @Column(nullable = false)
     private String lastName;
 
-    private String role;
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name="user_roles", joinColumns = @JoinColumn(name="user_id"))
+    @Column(name="role")
+    private List<Role> roles = new ArrayList<Role>();
 }

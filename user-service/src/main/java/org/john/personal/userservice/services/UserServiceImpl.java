@@ -4,6 +4,7 @@ import org.john.personal.userservice.dtos.request.RegisterRequestDto;
 import org.john.personal.userservice.dtos.response.UserResponseDTO;
 import org.john.personal.userservice.exceptions.CustomAuthenticationException;
 import org.john.personal.userservice.exceptions.UserNameAlreadyExists;
+import org.john.personal.userservice.models.Role;
 import org.john.personal.userservice.models.UserEntity;
 import org.john.personal.userservice.repositories.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,8 +44,17 @@ public class UserServiceImpl {
             throw new UserNameAlreadyExists("Username already taken!");
         }
         UserEntity user = new UserEntity();
+        user.setFirstName(requestDto.getFirstName());
+        user.setLastName(requestDto.getLastName());
+        user.setUsername(requestDto.getUsername());
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        user.setRole("ROLE_USER");
+
+        if(requestDto.getRoles() != null && !requestDto.getRoles().isEmpty()){
+            user.setRoles(new ArrayList<>(requestDto.getRoles()));
+        } else {
+            user.setRoles(List.of(Role.USER));
+        }
+
         System.out.println("SAVING NEW USER==========");
         user = userRepository.save(user);
         return UserResponseDTO.from(user);

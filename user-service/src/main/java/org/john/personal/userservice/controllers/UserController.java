@@ -3,7 +3,6 @@ package org.john.personal.userservice.controllers;
 import org.john.personal.userservice.dtos.request.LoginRequestDto;
 import org.john.personal.userservice.dtos.request.RegisterRequestDto;
 import org.john.personal.userservice.dtos.response.UserResponseDTO;
-import org.john.personal.userservice.models.UserEntity;
 import org.john.personal.userservice.services.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

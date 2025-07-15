@@ -30,8 +30,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         UserEntity userEntity = userEntityOptional.get();
         return new User(userEntity.getUsername(), userEntity.getPassword(),
-                Arrays.stream(userEntity.getRole().split("\\|"))
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+                userEntity.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList()));
     }
 
 }
