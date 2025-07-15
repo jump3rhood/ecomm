@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TestController {
+
     @GetMapping("/check")
     public ResponseEntity<String> check() {
+        System.out.println("check");
         return ResponseEntity.ok("OK");
     }
+
 }

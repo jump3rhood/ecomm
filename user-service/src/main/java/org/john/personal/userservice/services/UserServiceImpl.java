@@ -50,6 +50,7 @@ public class UserServiceImpl {
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         if(requestDto.getRoles() != null && !requestDto.getRoles().isEmpty()){
+            System.out.println(requestDto.getRoles());
             user.setRoles(new ArrayList<>(requestDto.getRoles()));
         } else {
             user.setRoles(List.of(Role.USER));
@@ -97,4 +98,11 @@ public class UserServiceImpl {
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }
 
+    public List<UserResponseDTO> getAllUsers() {
+        List<UserEntity> allUsers = userRepository.findAll();
+        for(UserEntity user : allUsers) {
+            System.out.println(user.getEmail());
+        }
+        return allUsers.stream().map(UserResponseDTO::from).collect(Collectors.toList());
+    }
 }
