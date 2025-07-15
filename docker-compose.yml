@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -47,9 +45,48 @@ services:
       REDIS_HOST: my-redis
     networks:
       - backend
+  postgres-user:
+    image: postgres:15
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: authserver
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d authserver" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+    build:
+      context:  ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres-user:5432/authserver
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: root
+      KEYSTORE_PASSWORD: password
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    networks:
+      - backend
 
 volumes:
   mysql_data:
+  postgres_user_data:
 
 networks:
   backend:
