@@ -8,7 +8,16 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.username=postgres
 spring.datasource.password=password
 
-
-spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+
+spring.flyway.user=postgres
+spring.flyway.password=yourpassword
+spring.flyway.baseline-on-migrate=false
+
+spring.security.oauth2.client.registration.google.client-id=client-id-here
+spring.security.oauth2.client.registration.google.client-secret=client-secret-here
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
