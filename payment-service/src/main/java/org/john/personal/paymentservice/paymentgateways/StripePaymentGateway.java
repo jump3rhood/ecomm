@@ -46,7 +46,7 @@ public class StripePaymentGateway implements PaymentGateway {
                                         .setType(PaymentLinkCreateParams.AfterCompletion.Type.REDIRECT)
                                         .setRedirect(
                                                 PaymentLinkCreateParams.AfterCompletion.Redirect.builder()
-                                                        .setUrl("http://localhost:8080/payments/success?orderId="+orderId)
+                                                        .setUrl("http://localhost:8082/payments/success?orderId="+orderId)
                                                         .build()
                         ).build())
                         .build();
