@@ -25,3 +25,4 @@ COPY --from=builder /app/target/payment-service-0.0.1-SNAPSHOT.jar app.jar
 #expose the port
 EXPOSE 8082
 
+CMD ["java", "-jar", "app.jar"]

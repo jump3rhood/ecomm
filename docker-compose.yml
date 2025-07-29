@@ -84,6 +84,18 @@ services:
     networks:
       - backend
 
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8082:8082"
+    environment:
+      STRIPE_KEY: ${STRIPE_KEY}
+    networks:
+      - backend
+
 volumes:
   mysql_data:
   postgres_user_data:
