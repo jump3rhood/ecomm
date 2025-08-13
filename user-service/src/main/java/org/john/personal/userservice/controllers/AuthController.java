@@ -20,6 +20,7 @@ public class AuthController {
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody RegisterRequestDto requestDto){
         return ResponseEntity.ok(service.registerUser(requestDto));
     }
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginRequestDto requestDto){
         return ResponseEntity.ok(service.login(requestDto.getEmail(), requestDto.getPassword()));

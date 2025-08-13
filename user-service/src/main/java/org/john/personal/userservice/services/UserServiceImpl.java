@@ -1,5 +1,9 @@
 package org.john.personal.userservice.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.john.personal.userservice.dtos.SendEmailDto;
 import org.john.personal.userservice.dtos.request.RegisterRequestDto;
 import org.john.personal.userservice.dtos.response.UserResponseDTO;
 import org.john.personal.userservice.exceptions.CustomAuthenticationException;
@@ -7,6 +11,7 @@ import org.john.personal.userservice.exceptions.UserNameAlreadyExists;
 import org.john.personal.userservice.models.Role;
 import org.john.personal.userservice.models.UserEntity;
 import org.john.personal.userservice.repositories.UserRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,12 +36,19 @@ public class UserServiceImpl {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtEncoder jwtEncoder;
-
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtEncoder jwtEncoder) {
+    // Key --> Topic, Value --> Event
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private ObjectMapper objectMapper;
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtEncoder jwtEncoder,
+                           KafkaTemplate kafkaTemplate,
+                           ObjectMapper objectMapper)
+    {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtEncoder = jwtEncoder;
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public UserResponseDTO registerUser(RegisterRequestDto requestDto) {
@@ -59,6 +71,21 @@ public class UserServiceImpl {
 
         System.out.println("SAVING NEW USER==========");
         user = userRepository.save(user);
+
+        // push an event to Kafka which email-service will read and send a Welcome
+        // email to the user
+        SendEmailDto emailDto = new SendEmailDto();
+        emailDto.setEmail(requestDto.getEmail());
+        emailDto.setSubject("Welcome to Ecomm!");
+        emailDto.setBody("Hi! Happy to have you onboard with us!");
+
+        // push to Kafka
+        try {
+            kafkaTemplate.send("send-email", objectMapper.writeValueAsString(emailDto));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         return UserResponseDTO.from(user);
     }
 
