@@ -1,0 +1,7 @@
+spring.application.name=email-service
+spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS}
+sender.email=${SENDER_EMAIL}
+sender.password=${SENDER_PASSWORD}
+
+server.port=8181
+
