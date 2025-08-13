@@ -40,7 +40,7 @@ public class UserServiceImpl {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private ObjectMapper objectMapper;
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtEncoder jwtEncoder,
-                           KafkaTemplate kafkaTemplate,
+                           KafkaTemplate<String, String> kafkaTemplate,
                            ObjectMapper objectMapper)
     {
         this.userRepository = userRepository;

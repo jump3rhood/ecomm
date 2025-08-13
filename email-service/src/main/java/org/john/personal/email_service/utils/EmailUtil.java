@@ -36,14 +36,22 @@ public class EmailUtil {
             msg.setSentDate(new Date());
 
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
+            System.out.println("=======================");
+
             System.out.println("Message is ready");
             Transport.send(msg);
-
             System.out.println("EMail Sent Successfully!!");
+            System.out.println("=======================");
+
         }
         catch (Exception e) {
+
+            System.out.println("=======================");
+
             System.out.println("Email failed to send");
             e.printStackTrace();
+            System.out.println("=======================");
+
         }
     }
 }

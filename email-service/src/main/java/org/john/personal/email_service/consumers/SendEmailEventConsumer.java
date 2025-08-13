@@ -28,29 +28,37 @@ public class SendEmailEventConsumer {
 
     // reads from kafka and sends email
     @KafkaListener(topics = "send-email", groupId = "emailService")
-    public void handleSendEmailEvent(String message) throws JsonProcessingException {
-        SendEmailDto emailDto = objectMapper.readValue(message, SendEmailDto.class);
+    public void handleSendEmailEvent(String message) {
+        System.out.println("Received message: " + message);
+        try {
+            SendEmailDto emailDto = objectMapper.readValue(message, SendEmailDto.class);
 
-        String to = emailDto.getEmail();
-        String subject = emailDto.getSubject();
-        String body = emailDto.getBody();
+            String to = emailDto.getEmail();
+            String subject = emailDto.getSubject();
+            String body = emailDto.getBody();
 
-        // make a call to send the email
-        Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
-        props.put("mail.smtp.port", "587"); //TLS Port
-        props.put("mail.smtp.auth", "true"); //enable authentication
-        props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
+            // make a call to send the email
+            Properties props = new Properties();
+            props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
+            props.put("mail.smtp.port", "587"); //TLS Port
+            props.put("mail.smtp.auth", "true"); //enable authentication
+            props.put("mail.smtp.starttls.enable", "true"); //enable STARTTLS
 
-        //create Authenticator object to pass in Session.getInstance argument
-        Authenticator auth = new Authenticator() {
-            //override the getPasswordAuthentication method
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailUsername, emailPassword    );
-            }
-        };
-        Session session = Session.getInstance(props, auth);
+            //create Authenticator object to pass in Session.getInstance argument
+            Authenticator auth = new Authenticator() {
+                //override the getPasswordAuthentication method
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(emailUsername, emailPassword);
+                }
+            };
+            Session session = Session.getInstance(props, auth);
 
-        EmailUtil.sendEmail(session, to, subject, body);
+            EmailUtil.sendEmail(session, to, subject, body);
+        }catch(JsonProcessingException e){
+            System.out.println("=======================");
+            System.out.println("Email failed");
+            System.out.println(e);
+            System.out.println("=======================");
+        }
     }
 }
