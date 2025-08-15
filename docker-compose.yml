@@ -25,6 +25,27 @@ services:
     networks:
       - backend
 
+  service-discovery:
+    build:
+      context: ./service-discovery
+      dockerfile: Dockerfile
+    container_name: service-discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - backend
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "3001:3001"
+    environment:
+      KEYSTORE_PASSWORD: password
+    networks:
+      - backend
   productservice:
     build:
       context: ./product-service
