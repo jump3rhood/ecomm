@@ -15,6 +15,7 @@ public class PaymentController {
 
     @PostMapping("/initiatePayment/{orderId}")
     public String initiatePayment(@PathVariable Long orderId) {
+        System.out.println("Reached=========");
         return paymentService.initiatePayment(orderId);
     }
 
