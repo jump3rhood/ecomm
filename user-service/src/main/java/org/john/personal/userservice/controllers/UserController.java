@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RestController
 @EnableMethodSecurity
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserServiceImpl userService;
 

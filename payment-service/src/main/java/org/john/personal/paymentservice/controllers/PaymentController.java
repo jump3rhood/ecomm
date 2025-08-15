@@ -4,7 +4,7 @@ import org.john.personal.paymentservice.services.PaymentService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api/payments")
 public class PaymentController {
 
     private PaymentService paymentService;

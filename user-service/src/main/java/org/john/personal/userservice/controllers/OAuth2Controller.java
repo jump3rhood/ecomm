@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/oauth2")
+@RequestMapping("/api/auth/oauth2")
 public class OAuth2Controller {
     @GetMapping("/success")
     public ResponseEntity<Map<String, Object>> oauth2Success(@RequestParam String token) {
