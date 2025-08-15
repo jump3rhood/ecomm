@@ -90,7 +90,9 @@ public class UserServiceImpl {
     }
 
     public Map<String, Object> login(String email, String password) {
-
+        if(email == null || password == null){
+            throw new CustomAuthenticationException("Email or password is empty!");
+        }
         Map<String, Object> response = new HashMap<>();
 
         System.out.println("Reached here*****************");

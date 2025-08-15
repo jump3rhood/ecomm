@@ -102,12 +102,7 @@ services:
       - backend
     healthcheck:
       test:
-        [
-          'CMD',
-          'kafka-broker-api-versions',
-          '--bootstrap-server',
-          'localhost:9092',
-        ]
+        ['CMD', 'kafka-broker-api-versions', '--bootstrap-server', 'kafka:9092']
       interval: 10s
       timeout: 5s
       retries: 5

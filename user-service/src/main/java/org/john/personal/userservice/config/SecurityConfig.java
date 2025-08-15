@@ -37,9 +37,9 @@ public class SecurityConfig {
     public SecurityFilterChain customSecurityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/actuators/**").permitAll()
-                        .requestMatchers(("/oauth2/**")).permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/actuators/**").permitAll()
+                        .requestMatchers(("/api/oauth2/**")).permitAll()
                 .anyRequest().authenticated())
                 .formLogin(form-> form.disable())
                 .oauth2Login(oauth2 -> oauth2
